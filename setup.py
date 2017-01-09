@@ -42,6 +42,7 @@ setup(
     install_requires=[
         'cloudify-plugins-common>=3.3.1',
         'boto==2.38.0',
+        'clouidify-ghost-plugin',
         'pycrypto==2.6.1'
     ]
 )
