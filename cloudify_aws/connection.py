@@ -52,7 +52,7 @@ class EC2ConnectionClient():
             self.secure_client_config.update_config_with_secrets(
                 config=aws_config_property,
                 config_schema_name='aws_config'
-        )
+            )
 
         if not aws_config_property:
             return EC2Connection()
