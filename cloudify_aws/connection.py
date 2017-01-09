@@ -28,21 +28,32 @@ from boto.ec2.elb import connect_to_region as connect_to_elb_region
 # Cloudify Imports
 from . import utils, constants
 from cloudify.exceptions import NonRecoverableError
+from cloudify_ghost.secureclientconfig import \
+    CloudifySecureClientConfig as sec_client_cfg
 
 
 class EC2ConnectionClient():
     """Provides functions for getting the EC2 Client
     """
 
-    def __init__(self):
+    def __init__(self, secure_client_config=None):
         self.connection = None
+        self.secure_client_config = \
+            secure_client_config or sec_client_cfg()
 
-    def client(self):
+    def client(self, aws_config=None):
         """Represents the EC2Connection Client
         """
 
-        aws_config_property = (self._get_aws_config_property() or
+        aws_config_property = (self._get_aws_config_property(aws_config) or
                                self._get_aws_config_from_file())
+
+        aws_config_property = \
+            self.secure_client_config.update_config_with_secrets(
+                config=aws_config_property,
+                config_schema_name='aws_config'
+        )
+
         if not aws_config_property:
             return EC2Connection()
         elif aws_config_property.get('ec2_region_name'):
@@ -60,7 +71,7 @@ class EC2ConnectionClient():
 
         return EC2Connection(**aws_config)
 
-    def _get_aws_config_property(self):
+    def _get_aws_config_property(self, aws_config=None):
         node_properties = \
             utils.get_instance_or_source_node_properties()
         return node_properties[constants.AWS_CONFIG_PROPERTY]
@@ -137,14 +148,20 @@ class EC2ConnectionClient():
 
 class ELBConnectionClient(EC2ConnectionClient):
 
-    def client(self):
+    def client(self, aws_config=None):
         """Represents the ELBConnection Client
         """
 
-        aws_config_property = (self._get_aws_config_property() or
+        aws_config_property = (self._get_aws_config_property(aws_config) or
                                self._get_aws_config_from_file())
         if not aws_config_property:
             return ELBConnection()
+
+        aws_config_property = \
+            self.secure_client_config.update_config_with_secrets(
+                config=aws_config_property,
+                config_schema_name='aws_config'
+            )
 
         aws_config = aws_config_property.copy()
 
@@ -185,6 +202,13 @@ class VPCConnectionClient(EC2ConnectionClient):
 
         aws_config_property = (self._get_aws_config_property(aws_config) or
                                self._get_aws_config_from_file())
+
+        aws_config_property = \
+            self.secure_client_config.update_config_with_secrets(
+                config=aws_config_property,
+                config_schema_name='aws_config'
+            )
+
         if not aws_config_property:
             return VPCConnection()
         elif aws_config_property.get('ec2_region_name'):

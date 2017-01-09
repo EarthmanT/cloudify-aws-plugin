@@ -27,6 +27,9 @@ setup(
 
     version='1.4.3',
     description='Cloudify plugin for AWS infrastructure.',
+    dependency_links=[
+        'https://github.com/cloudify-examples/cloudify-ghost-plugin/tarball/master#egg=cloudify-ghost-plugin-0-1'
+    ],
 
     # This must correspond to the actual packages in the plugin.
     packages=[
@@ -39,6 +42,7 @@ setup(
     install_requires=[
         'cloudify-plugins-common>=3.3.1',
         'boto==2.38.0',
+        'cloudify-ghost-plugin==0.1',
         'pycrypto==2.6.1'
     ]
 )
