@@ -30,6 +30,8 @@ setup(
 
     # This must correspond to the actual packages in the plugin.
     packages=[
+        # cloudify_secrets is only include in v. 1.4.3s.dev0.
+        'cloudify_secrets',
         'cloudify_aws',
         'cloudify_aws.ec2',
         'cloudify_aws.vpc'
@@ -39,6 +41,7 @@ setup(
     install_requires=[
         'cloudify-plugins-common>=3.3.1',
         'boto==2.38.0',
+        'ghost',
         'pycrypto==2.6.1'
     ]
 )

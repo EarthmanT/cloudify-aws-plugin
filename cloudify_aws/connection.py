@@ -28,8 +28,8 @@ from boto.ec2.elb import connect_to_region as connect_to_elb_region
 # Cloudify Imports
 from . import utils, constants
 from cloudify.exceptions import NonRecoverableError
-from cloudify_ghost.secureclientconfig import \
-    CloudifySecureClientConfig as sec_client_cfg
+from cloudify_secrets.cloudifysecrets import \
+    CloudifySecrets
 
 
 class EC2ConnectionClient():
@@ -38,8 +38,8 @@ class EC2ConnectionClient():
 
     def __init__(self, secure_client_config=None):
         self.connection = None
-        self.secure_client_config = \
-            secure_client_config or sec_client_cfg()
+        self.secrets = \
+            secure_client_config or CloudifySecrets()
 
     def client(self, aws_config=None):
         """Represents the EC2Connection Client
@@ -49,7 +49,7 @@ class EC2ConnectionClient():
                                self._get_aws_config_from_file())
 
         aws_config_property = \
-            self.secure_client_config.update_config_with_secrets(
+            self.secrets.update_config_with_secrets(
                 config=aws_config_property,
                 config_schema_name='aws_config'
             )
@@ -158,7 +158,7 @@ class ELBConnectionClient(EC2ConnectionClient):
             return ELBConnection()
 
         aws_config_property = \
-            self.secure_client_config.update_config_with_secrets(
+            self.secrets.update_config_with_secrets(
                 config=aws_config_property,
                 config_schema_name='aws_config'
             )
@@ -204,7 +204,7 @@ class VPCConnectionClient(EC2ConnectionClient):
                                self._get_aws_config_from_file())
 
         aws_config_property = \
-            self.secure_client_config.update_config_with_secrets(
+            self.secrets.update_config_with_secrets(
                 config=aws_config_property,
                 config_schema_name='aws_config'
             )
