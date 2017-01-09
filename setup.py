@@ -28,8 +28,7 @@ setup(
     version='1.4.3s.dev0',
     description='Cloudify plugin for AWS infrastructure.',
     dependency_links=[
-        'https://github.com/cloudify-examples/cloudify-ghost-plugin'
-        '/tarball/master#egg=cloudify-ghost-plugin-0-1'
+        'https://github.com/cloudify-examples/cloudify-ghost-plugin/tarball/master#egg=cloudify-ghost-plugin'
     ],
 
     # This must correspond to the actual packages in the plugin.
