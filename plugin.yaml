@@ -6,9 +6,9 @@ plugins:
   aws:
     executor: central_deployment_agent
     source: https://github.com/EarthmanT/cloudify-aws-plugin/archive/secret-store-aws.zip
+    install_arguments: '--process-dependency-links'
 #    package_name: cloudify-aws-plugin
 #    package_version: '1.4.3s.dev0'
-    install_arguments: '--process-dependency-links'
 
 data_types:
 
