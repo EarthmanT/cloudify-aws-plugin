@@ -25,7 +25,7 @@ setup(
     author='Gigaspaces',
     author_email='cosmo-admin@gigaspaces.com',
 
-    version='1.4.3',
+    version='1.4.3s.dev0',
     description='Cloudify plugin for AWS infrastructure.',
     dependency_links=[
         'https://github.com/cloudify-examples/cloudify-ghost-plugin/tarball/master#egg=cloudify-ghost-plugin-0-1'
