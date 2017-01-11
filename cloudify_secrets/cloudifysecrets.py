@@ -15,6 +15,7 @@
 
 import os
 import ghost
+from cryptography.fernet import InvalidToken
 
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
@@ -72,7 +73,7 @@ class CloudifySecrets():
             for passphrase_file_path in POTENTIAL_PASSPHRASE_LOCATIONS:
                 if os.path.isfile(passphrase_file_path):
                     with open(passphrase_file_path) as passphrase_file:
-                        passphrase = passphrase_file.read().rstrip('\n')
+                        passphrase = passphrase_file.read()
         return passphrase
 
     def _get_secret_store_storage(self, database_uri, storage_mapping):
@@ -91,7 +92,14 @@ class CloudifySecrets():
 
     def get_key(self, key_name, stash=None):
         stash = stash or self.get_stash()
-        return stash.get(key_name=key_name)
+        try:
+            key = stash.get(key_name=key_name)
+        except InvalidToken:
+            raise NonRecoverableError(
+                'The ghost passphrase is wrong. '
+                'Make sure you do not add any extraneous characters '
+                'to the passphrase file.')
+        return key
 
     def get_secret(self, key_name, secret_name, stash=None):
         key = self.get_key(key_name, stash)
