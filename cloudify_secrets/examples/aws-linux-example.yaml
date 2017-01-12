@@ -1,0 +1,224 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - types.yaml
+  - https://raw.githubusercontent.com/EarthmanT/cloudify-aws-plugin/secret-store-aws/plugin.yaml
+
+inputs:
+
+  aws_access_key_id:
+    default: 'SUPER SECURE STUFF'
+
+  aws_secret_access_key:
+    default: 'SUPER SECURE STUFF'
+
+  ec2_region_name:
+    default: us-east-1
+
+  ec2_region_endpoint:
+    default: ec2.us-east-1.amazonaws.com
+
+  availability_zone:
+    default: us-east-1e
+
+  aws_configuration:
+    default:
+      aws_access_key_id: { get_input: aws_access_key_id }
+      aws_secret_access_key: { get_input: aws_secret_access_key }
+      ec2_region_name: { get_input: ec2_region_name }
+      ec2_region_endpoint: { get_input: ec2_region_endpoint }
+
+  use_existing_example_aws_vpc:
+    description: >
+      If you have a VPC that you want to use this should be true.
+    default: false
+
+  example_aws_vpc_id:
+    description: >
+      If you changed the input use_existing_vpc, then you should put the VPC ID here.
+    default: ''
+
+  example_aws_vpc_cidr:
+    default: 172.16.0.0/16
+
+  use_existing_aws_ip:
+    description: >
+      If you have an existing elastic ip attached to the nat instance that you want to use this should be true.
+    default: false
+
+  existing_aws_ip:
+    description: >
+      If you changed use_existing_example_aws_elastic_ip to true, then this is the elastic ip ID.
+    default: ''
+
+  existing_aws_ip_domain:
+    default: 'vpc'
+
+  use_existing_example_aws_public_subnet:
+    description: >
+      If you have an existing public subnet on an existing VPC that you want to use this should be true.
+    default: false
+
+  example_aws_public_subnet_id:
+    description: >
+      If you changed use_existing_example_aws_public_subnet to true, then this is the subnet ID.
+    default: ''
+
+  example_aws_public_subnet_cidr:
+    default: 172.16.122.0/24
+
+  example_aws_public_subnet_availability_zone:
+    default: us-east-1e
+
+  use_existing_example_aws_private_subnet:
+    description: >
+      If you have an existing public subnet on an existing VPC that you want to use this should be true.
+    default: false
+
+  example_aws_private_subnet_id:
+    description: >
+      If you changed use_existing_example_aws_private_subnet to true, then this is the subnet ID.
+    default: ''
+
+  example_aws_private_subnet_cidr:
+    default: 172.16.123.0/24
+
+  example_aws_private_subnet_availability_zone:
+    default: us-east-1e
+
+  use_existing_example_aws_security_group:
+    description: >
+      If you have a VPC that you want to use this should be true.
+    default: false
+
+  example_aws_security_group_id:
+    description: >
+      If you changed the input use_existing_example_aws_security_group, then you should put the VPC ID here.
+    default: ''
+
+  example_aws_security_group_rules:
+    default:
+      - ip_protocol: tcp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+      - ip_protocol: udp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+      - ip_protocol: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+
+  use_existing_example_aws_key:
+    default: false
+
+  example_aws_key:
+    default: aws-key
+
+  example_aws_key_file:
+    default: ~/.ssh/aws-key.pem
+
+  use_existing_linux_aws_virtual_machine:
+    type: boolean
+    default: false
+
+  linux_aws_virtual_machine:
+    type: string
+    default: ''
+
+  linux_aws_virtual_machine_image_id:
+    default: ami-c8580bdf
+
+  linux_aws_virtual_machine_instance_type:
+    default: m3.medium
+
+  linux_aws_instances:
+    default: 1
+
+  aws_agent_username:
+    default: ubuntu
+
+  aws_agent_local_path_to_key_file:
+    default: { get_input: example_aws_key_file }
+
+  aws_agent_port:
+    default: 22
+
+node_templates:
+
+  example_aws_key:
+    type: cloudify.aws.nodes.KeyPair
+    properties:
+      aws_config: { get_input: aws_configuration }
+      use_external_resource: { get_input: use_existing_example_aws_key }
+      resource_id: { get_input: example_aws_key }
+      private_key_path: { get_input: example_aws_key_file }
+
+  example_aws_vpc:
+    type: cloudify.aws.nodes.VPC
+    properties:
+      aws_config: { get_input: aws_configuration }
+      use_external_resource: { get_input: use_existing_example_aws_vpc }
+      resource_id: { get_input: example_aws_vpc_id }
+      cidr_block: { get_input: example_aws_vpc_cidr }
+
+  aws_ip:
+    type: cloudify.aws.nodes.ElasticIP
+    properties:
+      aws_config: { get_input: aws_configuration }
+      use_external_resource: { get_input: use_existing_aws_ip }
+      resource_id: { get_input: existing_aws_ip }
+      domain: { get_input: existing_aws_ip_domain }
+
+  example_aws_public_subnet:
+    type: cloudify.aws.nodes.Subnet
+    properties:
+      aws_config: { get_input: aws_configuration }
+      use_external_resource: { get_input: use_existing_example_aws_public_subnet }
+      resource_id: { get_input: example_aws_public_subnet_id }
+      cidr_block: { get_input: example_aws_public_subnet_cidr }
+      availability_zone: { get_input: example_aws_public_subnet_availability_zone }
+    relationships:
+      - type: cloudify.aws.relationships.subnet_contained_in_vpc
+        target: example_aws_vpc
+
+  example_aws_security_group:
+    type: cloudify.aws.nodes.SecurityGroup
+    properties:
+      aws_config: { get_input: aws_configuration }
+      use_external_resource: { get_input: use_existing_example_aws_security_group }
+      resource_id: { get_input: example_aws_security_group_id }
+      description: Compute Security Group
+      rules: { get_input: example_aws_security_group_rules }
+    relationships:
+      - type: cloudify.aws.relationships.security_group_contained_in_vpc
+        target: example_aws_vpc
+
+  linux_aws_virtual_machine:
+    type: cloudify.aws.nodes.Instance
+    capabilities:
+      scalable:
+        properties:
+          default_instances: { get_input: linux_aws_instances }
+    properties:
+      aws_config: { get_input: aws_configuration }
+      agent_config:
+        install_method: none
+        user: { get_input: aws_agent_username }
+        key: { get_input: aws_agent_local_path_to_key_file }
+        port: { get_input: aws_agent_port }
+      use_external_resource: { get_input: use_existing_linux_aws_virtual_machine }
+      resource_id: { get_input: linux_aws_virtual_machine }
+      image_id: { get_input: linux_aws_virtual_machine_image_id }
+      instance_type: { get_input: linux_aws_virtual_machine_instance_type }
+      parameters:
+        placement: { get_property: [ example_aws_public_subnet, availability_zone ] }
+    relationships:
+      - type: cloudify.aws.relationships.instance_contained_in_subnet
+        target: example_aws_public_subnet
+      - type: cloudify.aws.relationships.instance_connected_to_keypair
+        target: example_aws_key
+      - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
+        target: aws_ip

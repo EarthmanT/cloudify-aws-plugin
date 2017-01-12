@@ -39,6 +39,8 @@ class CloudifySecrets():
                  storage_mapping=DEFAULT_STORAGE_MAPPING):
         self.passphrase = self._get_secret_store_passphrase(passphrase)
         self.storage = self._get_secret_store_storage(database_uri, storage_mapping)
+        self.use = \
+            False if not self.controller_config.get('use_secret_store') else True
 
     @property
     def controller_config(self):
@@ -94,11 +96,15 @@ class CloudifySecrets():
         stash = stash or self.get_stash()
         try:
             key = stash.get(key_name=key_name)
-        except InvalidToken:
+        except InvalidToken as e:
             raise NonRecoverableError(
                 'The ghost passphrase is wrong. '
                 'Make sure you do not add any extraneous characters '
-                'to the passphrase file.')
+                'to the passphrase file. '
+                'Error: {0}'.format(str(e)))
+        except IOError as e:
+            raise NonRecoverableError(
+                'Unable to get secret: {0}'.format(str(e)))
         return key
 
     def get_secret(self, key_name, secret_name, stash=None):

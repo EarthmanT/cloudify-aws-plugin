@@ -48,11 +48,12 @@ class EC2ConnectionClient():
         aws_config_property = (self._get_aws_config_property(aws_config) or
                                self._get_aws_config_from_file())
 
-        aws_config_property = \
-            self.secrets.update_config_with_secrets(
-                config=aws_config_property,
-                config_schema_name='aws_config'
-            )
+        if self.secrets.use:
+            aws_config_property = \
+                self.secrets.update_config_with_secrets(
+                    config=aws_config_property,
+                    config_schema_name='aws_config'
+                )
 
         if not aws_config_property:
             return EC2Connection()

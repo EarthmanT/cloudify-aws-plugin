@@ -1,0 +1,82 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - types.yaml
+  - https://raw.githubusercontent.com/EarthmanT/cloudify-aws-plugin/secret-store-aws/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/network/vpc.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/network/private-subnet/subnet.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/network/public-subnet/subnet.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/network/public-subnet/internet-gateway.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/compute/elastic-ip.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/compute/key.yaml
+  - https://raw.githubusercontent.com/cloudify-examples/aws-azure-openstack-blueprint/master/aws/compute/security-group.yaml
+
+inputs:
+
+  aws_access_key_id:
+    default: ''
+
+  aws_secret_access_key:
+    default: ''
+
+  ec2_region_name:
+    default: us-east-1
+
+  ec2_region_endpoint:
+    default: ec2.us-east-1.amazonaws.com
+
+  availability_zone:
+    default: us-east-1e
+
+  aws_configuration:
+    default:
+      aws_access_key_id: { get_input: aws_access_key_id }
+      aws_secret_access_key: { get_input: aws_secret_access_key }
+      ec2_region_name: { get_input: ec2_region_name }
+      ec2_region_endpoint: { get_input: ec2_region_endpoint }
+
+  use_existing_windows_aws_virtual_machine:
+    type: boolean
+    default: false
+
+  windows_aws_virtual_machine:
+    type: string
+    default: ''
+
+  windows_aws_virtual_machine_image_id:
+    default: ami-c8580bdf
+
+  windows_aws_virtual_machine_instance_type:
+    default: m3.medium
+
+  aws_agent_username:
+    default: ubuntu
+
+  aws_agent_port:
+    default: 22
+
+node_templates:
+
+  aws_windows_virtual_machine:
+    type: cloudify.aws.nodes.Instance
+    properties:
+      aws_config: { get_input: aws_configuration }
+      agent_config:
+        user: { get_input: aws_agent_username }
+        key: { get_input: example_aws_key_file }
+        port: { get_input: aws_agent_port }
+      use_external_resource: { get_input: use_existing_windows_aws_virtual_machine }
+      resource_id: { get_input: windows_aws_virtual_machine }
+      image_id: { get_input: windows_aws_virtual_machine_image_id }
+      instance_type: { get_input: windows_aws_virtual_machine_instance_type }
+      parameters:
+        placement: { get_property: [ example_aws_public_subnet, availability_zone ] }
+    relationships:
+      - type: cloudify.aws.relationships.instance_contained_in_subnet
+        target: example_aws_public_subnet
+      - type: cloudify.aws.relationships.instance_connected_to_security_group
+        target: example_aws_security_group
+      - type: cloudify.aws.relationships.instance_connected_to_keypair
+        target: example_aws_key
+      - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
+        target: example_aws_elastic_ip
