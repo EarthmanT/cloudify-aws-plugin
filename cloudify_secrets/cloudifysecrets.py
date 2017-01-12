@@ -67,6 +67,7 @@ class CloudifySecrets():
             'Currently this is OK, because the controller_config '
             'is not fully supported in Cloudify.'
         )
+
         return {}
 
     def _get_secret_store_passphrase(self, passphrase):

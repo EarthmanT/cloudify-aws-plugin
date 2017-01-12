@@ -24,6 +24,7 @@ from boto.ec2.elb import ELBConnection
 from boto.vpc import VPCConnection
 from boto.regioninfo import RegionInfo
 from boto.ec2.elb import connect_to_region as connect_to_elb_region
+from cloudify import ctx
 
 # Cloudify Imports
 from . import utils, constants
@@ -49,6 +50,10 @@ class EC2ConnectionClient():
                                self._get_aws_config_from_file())
 
         if self.secrets.use:
+            ctx.logger.info(
+                'Using controller_config: {0}'
+                .format(self.secrets.controller_config)
+            )
             aws_config_property = \
                 self.secrets.update_config_with_secrets(
                     config=aws_config_property,
