@@ -535,6 +535,9 @@ data_types:
           Each queue has a unique ID, which is this string.
         type: string
         required: true
+      use_secret_store:
+        description: Whether or not to use the secret store.
+        required: true
       secret_schemas:
         description: |
           The best description is an example:
