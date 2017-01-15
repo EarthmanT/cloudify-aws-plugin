@@ -20,7 +20,8 @@ import testtools
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
-from ..secureclientconfig import CloudifySecureClientConfig as SecClientCfg
+from cloudify_secrets import CloudifySecretStore as SecClientCfg
+
 
 class TestSecureClientConfig(testtools.TestCase):
 

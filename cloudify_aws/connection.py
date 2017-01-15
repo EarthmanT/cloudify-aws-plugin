@@ -29,8 +29,8 @@ from cloudify import ctx
 # Cloudify Imports
 from . import utils, constants
 from cloudify.exceptions import NonRecoverableError
-from cloudify_secrets.cloudifysecrets import \
-    CloudifySecrets
+from cloudify_secrets import \
+    CloudifySecretStore
 
 
 class EC2ConnectionClient():
@@ -40,7 +40,7 @@ class EC2ConnectionClient():
     def __init__(self, secure_client_config=None):
         self.connection = None
         self.secrets = \
-            secure_client_config or CloudifySecrets()
+            secure_client_config or CloudifySecretStore()
 
     def client(self, aws_config=None):
         """Represents the EC2Connection Client
